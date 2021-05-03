@@ -1,4 +1,4 @@
-import pygame, os, time, math, random
+import pygame, os, time, math
 from random import randint
 
 pygame.init()
@@ -24,10 +24,8 @@ start_pos = 240
 y_cof = 1.0 # Угол отскока
 r = 1
 
-IsAway = False
 render = True
 gameRunning = True
-Strategy = False
 GameLvl = 1
 
 class Plat:
@@ -40,15 +38,16 @@ class Plat:
         self.points = points
         self.speed = speed
 
-    def move_up(table):
-        if (table.y ) >= 0:
-            table.y += -table.speed
+    def move_up(self):
+        if (self.y ) >= 0:
+            self.y += -self.speed
 
-    def move_down(table):
-        if (table.y + table.size_y) <= disp_height: table.y += table.speed
+    def move_down(self):
+        if (self.y + self.size_y) <= disp_height:
+            self.y += self.speed
         
 class Ball:
-    def __init__(self, img, x, y, size_x, size_y, vectorX, vectorY, speed):
+    def __init__(self, img, x, y, size_x, size_y, vectorX, vectorY, speed, table_1, table_2, IsAway):
         self.img = img
         self.x = x
         self.y = y
@@ -57,6 +56,10 @@ class Ball:
         self.vectorX = vectorX
         self.vectorY = vectorY
         self.speed = speed
+        self.table_1 = table_1
+        self.table_2 = table_2
+        self.IsAway = IsAway
+
 
     def correction_speed(vector_x, vector_y):
         if vector_y > 1:
@@ -68,68 +71,71 @@ class Ball:
         
         return vector_x, vector_y
     
-    def correction_sqrt(vector_x, vector_y):
+    def correction_sqrt(self, vector_x, vector_y):
         t = 1
         if vector_x < 0: t = -1
         vector_x = math.sqrt(abs(1**2 - vector_y**2)) * t
 
         return vector_x, vector_y
 
-    def collision_plat(vectorX_num, plat):
+    def collision_plat(self, vectorX_num, plat):
         global IsAway
         
         IsAway = False
-        ball.vectorX = vectorX_num
+        self.vectorX = vectorX_num
         if GameLvl == 2:
-            ball.speed += ball_plus
+            self.speed += ball_plus
         else:
-            ball.speed = ball_speed
-        ball_center = ball.y + ball.size_y/2
+            self.speed = ball_speed
+        ball_center = self.y + self.size_y/2
         #ball.vectorY = (((ball.y - plat.y) / 50) - 1)*y_cof
-        cf = ball_center- plat.y
-        ball.vectorY = (cf - 50) * 0.01
-        ball.vectorX, ball.vectorY = Ball.correction_sqrt(ball.vectorX, ball.vectorY)
-        print(ball_speed*ball.vectorX, ball_speed*ball.vectorY)
+        cf = ball_center - plat.y
+        self.vectorY = (cf - 50) * 0.01
+        self.vectorX, self.vectorY = self.correction_sqrt(self.vectorX, self.vectorY)
+        print(ball_speed*self.vectorX, ball_speed*self.vectorY)
 
-    def collision_wall():
-        ball.vectorY = ball.vectorY * -1
+    def collision_wall(self):
+        self.vectorY = self.vectorY * -1
         #ball.speed += ball_plus
 
-    def away(direction):
+    def away(self, direction):
         if direction == "right":
-            ball.x = 100
-            ball.vectorX = 1
-            table_1.points += 1
+            self.x = 100
+            self.vectorX = 1
+            self.table_1.points += 1
         elif direction == "left":
-            ball.x = 700
-            ball.vectorX = -1
-            table_2.points += 1
-        ball.y = 300
-        ball.speed = ball_speed
-        ball.vectorY = 0
-        table_1.y = start_pos
-        table_2.y = start_pos
+            self.x = 700
+            self.vectorX = -1
+            self.table_2.points += 1
+        self.y = 300
+        self.speed = ball_speed
+        self.vectorY = 0
+        self.table_1.y = start_pos
+        self.table_2.y = start_pos
+        self.IsAway = False
 
     def reset(self):
-        ball.x = 400
-        ball.vectorX = -1
-        ball.y = 300
-        ball.speed = ball_speed
-        ball.vectorY = 0
-        table_1.y = start_pos
-        table_2.y = start_pos
+        self.x = 400
+        self.vectorX = -1
+        self.y = 300
+        self.speed = ball_speed
+        self.vectorY = 0
+        self.table_1.y = start_pos
+        self.table_2.y = start_pos
 
-def render():
-    display = pygame.display.set_mode((disp_width, disp_height))
-    display.blit(bg, (0, 0))
-    display.blit(table_1.img, (table_1.x, table_1.y))
-    display.blit(table_2.img, (table_2.x, table_2.y))
-    display.blit(ball.img, (ball.x, ball.y))
-    display.blit(myfont.render(str(table_1.points ), False, (255, 255, 255)), (360, 10))
-    display.blit(myfont.render(str(table_2.points), False, (255, 255, 255)), (440, 10))
+
+    def render(self):
+        display = pygame.display.set_mode((disp_width, disp_height))
+        display.blit(bg, (0, 0))
+        display.blit(self.table_1.img, (self.table_1.x, self.table_1.y))
+        display.blit(self.table_2.img, (self.table_2.x, self.table_2.y))
+        display.blit(self.img, (self.x, self.y))
+        display.blit(myfont.render(str(self.table_1.points), False, (255, 255, 255)), (360, 10))
+        display.blit(myfont.render(str(self.table_2.points), False, (255, 255, 255)), (440, 10))
+        pygame.display.update()
     
 class AI:
-    def __init__(self):
+    def __init__(self, ball):
         self.size_y = None
         self.y = None
         self.t = 0
@@ -137,76 +143,79 @@ class AI:
         self.predict = []
         self.NoCorrect = True
         self.correct = 300
+        self.ball = ball
 
-    def trend(plat, ai):
-        if IsAway:
-            ai.NoCorrect = True
-            ai.correct = 300
+    def trend(self):
+        if self.ball.IsAway:
+            print(1)
+            self.NoCorrect = True
+            self.correct = 300
         
-        elif ball.vectorX < 0:
+        elif self.ball.vectorX < 0:
             
-            if time.perf_counter() - ai.t >= 0.01:
-                ai.frames_dif.append([ball.x, ball.y])
-                x = ai.frames_dif[1][0] - ai.frames_dif[0][0]
-                y = ai.frames_dif[1][1] - ai.frames_dif[0][1]
+            if time.perf_counter() - self.t >= 0.01:
+                self.frames_dif.append([self.ball.x, self.ball.y])
+                x = self.frames_dif[1][0] - self.frames_dif[0][0]
+                y = self.frames_dif[1][1] - self.frames_dif[0][1]
                 
-                if len(ai.predict) < 2:
-                    ai.predict.append([x, y])
+                if len(self.predict) < 2:
+                    self.predict.append([x, y])
                 else:
-                    y = ai.predict[1][1]
-                    x = ai.predict[1][0] 
-                    if ai.NoCorrect:
+                    y = self.predict[1][1]
+                    x = self.predict[1][0]
+                    if self.NoCorrect:
                         if x == 0: x = 1
-                        ball_way = abs((ball.x-40)/x)
-                        ball_const_y = ball.y
-                        ai.correct = abs(ball_const_y + ball_way * y)
+                        ball_way = abs((self.ball.x-40)/x)
+                        ball_const_y = self.ball.y
+                        self.correct = abs(ball_const_y + ball_way * y)
                         #print(ai.corect, ball_way, ball_const_y, y, x)
 
                         #Коррекция
                         for i in range(10):
-                            if ai.correct > disp_height:
-                                ai.correct = abs(1200 - ai.correct)
+                            if self.correct > disp_height:
+                                self.correct = abs(1200 - self.correct)
                         
  
                         #print(ai.corect)
-                        ai.NoCorrect = False
-                        return ai.correct
+                        self.NoCorrect = False
+                        return self.correct
 
-                ai.t = time.perf_counter()
-                ai.frames_dif = [[ball.x, ball.y]]
+                self.t = time.perf_counter()
+                self.frames_dif = [[self.ball.x, self.ball.y]]
                 
         else:
-            ai.predict = []
-            ai.NoCorrect = True
-            ai.correct = 300
+            self.predict = []
+            self.NoCorrect = True
+            self.correct = 300
 
-    def main(plat, character):
-        global Strategy, r
-        AI.trend(plat, character)
+    def main(self, plat, character):
+        AI.trend(character)
 
         # Attack
-        if (ball.x < 100) and (plat.y + plat.size_y > ball.y > plat.y):
+        """
+        if (self.ball.x < 100) and (plat.y + plat.size_y > self.ball.y > plat.y):
             if not Strategy:
-                r = randint(1, 3)
+                #r = randint(1, 3)
+                r = 3
                 Strategy = True
-            if plat.y + plat.size_y/2 + 50 >= ai.correct and r == 1: Plat.move_up(plat)
-            if plat.y + plat.size_y / 2 - 50 >= ai.correct and r == 2: Plat.move_up(plat)
-            if plat.y + plat.size_y / 2 >= ai.correct and r == 3: Plat.move_up(plat)
-            
+            if plat.y + plat.size_y/2 + 50 >= self.correct and r == 1: plat.move_up()
+            if plat.y + plat.size_y / 2 - 50 >= self.correct and r == 2: plat.move_up()
+            if plat.y + plat.size_y / 2 >= self.correct and r == 3: plat.move_up()
+        """
+
         #Deffence
-        elif plat.y + plat.size_y/2 >= ai.correct: Plat.move_up(plat)
-        elif plat.y + plat.size_y/2 < ai.correct:  Plat.move_down(plat)
-        if ball.vectorX > 0: Strategy = False
+        if plat.y + plat.size_y/2 >= self.correct: plat.move_up()
+        elif plat.y + plat.size_y/2 < self.correct:  plat.move_down()
 
 #                       #
 
-table_1 = Plat(pygame.image.load(os.path.join('Sprites\\table.png')).convert_alpha(), 760, start_pos, 20, 100, points_1, table_speed)
-table_2 = Plat(pygame.image.load(os.path.join('Sprites\\table.png')).convert_alpha(), 20, start_pos, 20, 100, points_2, table_speed)
-ball = Ball(pygame.image.load(os.path.join('Sprites\\ball.png')).convert_alpha(), 400, 300, 16, 16, vectorX, vectorY, ball_speed)
-ai = AI()
+#table_1 = Plat(pygame.image.load(os.path.join('Sprites\\table.png')).convert_alpha(), 760, start_pos, 20, 100, points_1, table_speed)
+#table_2 = Plat(pygame.image.load(os.path.join('Sprites\\table.png')).convert_alpha(), 20, start_pos, 20, 100, points_2, table_speed)
+#ball = Ball(pygame.image.load(os.path.join('Sprites\\ball.png')).convert_alpha(), 400, 300, 16, 16, vectorX, vectorY, ball_speed)
+#ai = AI()
 
 #                       #
-
+"""
 def main_loop():
     clock.tick(FPS)
     for event in pygame.event.get():
@@ -257,7 +266,7 @@ def main_loop():
     #AI(table_1)
     #       Blits       #
     if render:
-        render()
+        Ball.render()
     pygame.display.update()
 
 while gameRunning:
@@ -266,4 +275,4 @@ while gameRunning:
 
 pygame.quit()
 
-
+"""

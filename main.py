@@ -10,9 +10,10 @@ res = env.reset()
 env.step(0)
 
 model = PPO2(MlpPolicy, env, verbose=1)
-model.learn(total_timesteps=20000)
+model.learn(total_timesteps=200000)
 obs = env.reset()
-for i in range(1):
+for i in range(1000000):
+  env.clock.tick(mainscript.FPS)
   action, _states = model.predict(obs)
   obs, rewards, done, info = env.step(action)
   env.render()
