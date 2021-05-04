@@ -47,7 +47,7 @@ class Plat:
             self.y += self.speed
         
 class Ball:
-    def __init__(self, img, x, y, size_x, size_y, vectorX, vectorY, speed, table_1, table_2, IsAway):
+    def __init__(self, img, x, y, size_x, size_y, vectorX, vectorY, speed, table_1, table_2, IsAway, Wait):
         self.img = img
         self.x = x
         self.y = y
@@ -59,6 +59,7 @@ class Ball:
         self.table_1 = table_1
         self.table_2 = table_2
         self.IsAway = IsAway
+        self.Wait = Wait
 
 
     def correction_speed(vector_x, vector_y):
@@ -79,9 +80,7 @@ class Ball:
         return vector_x, vector_y
 
     def collision_plat(self, vectorX_num, plat):
-        global IsAway
-        
-        IsAway = False
+
         self.vectorX = vectorX_num
         if GameLvl == 2:
             self.speed += ball_plus
@@ -92,7 +91,9 @@ class Ball:
         cf = ball_center - plat.y
         self.vectorY = (cf - 50) * 0.01
         self.vectorX, self.vectorY = self.correction_sqrt(self.vectorX, self.vectorY)
-        print(ball_speed*self.vectorX, ball_speed*self.vectorY)
+        #print(ball_speed*self.vectorX, ball_speed*self.vectorY)
+        self.IsAway = False
+        self.Wait = False
 
     def collision_wall(self):
         self.vectorY = self.vectorY * -1
@@ -112,7 +113,6 @@ class Ball:
         self.vectorY = 0
         self.table_1.y = start_pos
         self.table_2.y = start_pos
-        self.IsAway = False
 
     def reset(self):
         self.x = 400
@@ -146,8 +146,14 @@ class AI:
         self.ball = ball
 
     def trend(self):
+
         if self.ball.IsAway:
-            print(1)
+            self.NoCorrect = True
+            self.correct = 300
+            self.ball.IsAway = False
+            self.ball.Wait = True
+
+        elif self.ball.Wait:
             self.NoCorrect = True
             self.correct = 300
         
@@ -206,6 +212,10 @@ class AI:
         #Deffence
         if plat.y + plat.size_y/2 >= self.correct: plat.move_up()
         elif plat.y + plat.size_y/2 < self.correct:  plat.move_down()
+
+    def low_ai_main(self, plat, character):
+        if plat.y + plat.size_y/2 >= self.ball.y: plat.move_up()
+        elif plat.y + plat.size_y/2 < self.ball.y:  plat.move_down()
 
 #                       #
 
