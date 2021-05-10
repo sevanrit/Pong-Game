@@ -166,6 +166,7 @@ class AI:
                 
                 if len(self.predict) < 2:
                     self.predict.append([x, y])
+
                 else:
                     y = self.predict[1][1]
                     x = self.predict[1][0]
@@ -174,15 +175,12 @@ class AI:
                         ball_way = abs((self.ball.x-40)/x)
                         ball_const_y = self.ball.y
                         self.correct = abs(ball_const_y + ball_way * y)
-                        #print(ai.corect, ball_way, ball_const_y, y, x)
 
                         #Коррекция
                         for i in range(10):
                             if self.correct > disp_height:
                                 self.correct = abs(1200 - self.correct)
-                        
- 
-                        #print(ai.corect)
+
                         self.NoCorrect = False
                         return self.correct
 
@@ -197,92 +195,10 @@ class AI:
     def main(self, plat, character):
         AI.trend(character)
 
-        # Attack
-        """
-        if (self.ball.x < 100) and (plat.y + plat.size_y > self.ball.y > plat.y):
-            if not Strategy:
-                #r = randint(1, 3)
-                r = 3
-                Strategy = True
-            if plat.y + plat.size_y/2 + 50 >= self.correct and r == 1: plat.move_up()
-            if plat.y + plat.size_y / 2 - 50 >= self.correct and r == 2: plat.move_up()
-            if plat.y + plat.size_y / 2 >= self.correct and r == 3: plat.move_up()
-        """
-
         #Deffence
-        if plat.y + plat.size_y/2 >= self.correct: plat.move_up()
-        elif plat.y + plat.size_y/2 < self.correct:  plat.move_down()
+        if plat.y + plat.size_y/2 + randint(-50, 50) >= self.correct: plat.move_up()
+        elif plat.y + plat.size_y/2 + randint(-50, 50)< self.correct:  plat.move_down()
 
-    def low_ai_main(self, plat, character):
+    def low_ai_main(self, plat):
         if plat.y + plat.size_y/2 >= self.ball.y: plat.move_up()
         elif plat.y + plat.size_y/2 < self.ball.y:  plat.move_down()
-
-#                       #
-
-#table_1 = Plat(pygame.image.load(os.path.join('Sprites\\table.png')).convert_alpha(), 760, start_pos, 20, 100, points_1, table_speed)
-#table_2 = Plat(pygame.image.load(os.path.join('Sprites\\table.png')).convert_alpha(), 20, start_pos, 20, 100, points_2, table_speed)
-#ball = Ball(pygame.image.load(os.path.join('Sprites\\ball.png')).convert_alpha(), 400, 300, 16, 16, vectorX, vectorY, ball_speed)
-#ai = AI()
-
-#                       #
-"""
-def main_loop():
-    clock.tick(FPS)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            gameRunning = False
-    #       KEYS        #
-    keys = pygame.key.get_pressed()
-
-    if keys[pygame.K_o] and (table_1.y ) >= 0:
-        Plat.move_up(table_1)
-    if keys[pygame.K_l] and (table_1.y + table_1.size_y) <= disp_height:
-        Plat.move_down(table_1)
-
-    if keys[pygame.K_w] and (table_2.y ) >= 0:
-        Plat.move_up(table_2)
-    if keys[pygame.K_s] and (table_2.y + table_2.size_y) <= disp_height:
-        Plat.move_down(table_2)
-
-    if keys[pygame.K_q]: print(" Вектор X = ", ball.vectorX," Вектор Y = ", ball.vectorY," Позиция мяча X = ", ball.x," Позиция мяча Y = ", ball.y)
-
-    #       Collisions      #
-
-    if ball.y + ball.size_y > disp_height and ball.vectorY > 0:
-        Ball.collision_wall()
-    if ball.y < 0 and ball.vectorY <= 0:
-        Ball.collision_wall()
-
-    if ( table_1.y + table_1.size_y - ball.size_x/2 >= ball.y >= table_1.y - ball.size_x/2 ) and (ball.x + ball.size_x >= 760):
-        Ball.collision_plat(-1, table_1)
-
-    if ( table_2.y + table_2.size_y - ball.size_x/2 >= ball.y >= table_2.y - ball.size_x/2 ) and (ball.x <= 40):
-        Ball.collision_plat(1, table_2)
-
-    elif (ball.x + ball.size_x >= 760) and not( table_1.y + table_1.size_y - ball.size_x/2 >= ball.y >= table_1.y - ball.size_x/2 ): #МИМО ПРАВО
-        IsAway = True
-        Ball.away("right")
-
-    elif (ball.x <= 40) and not( table_2.y + table_2.size_y - ball.size_x/2 >= ball.y >= table_2.y - ball.size_x/2 ): #МИМО ЛЕВО
-        IsAway = True
-        Ball.away("left")
-
-
-    #       Ball        #
-    ball.y += ball.speed * ball.vectorY
-    ball.x += ball.speed * ball.vectorX
-    #       AI          #
-    AI.main(table_2, ai)
-    #AI(table_1)
-    #       Blits       #
-    if render:
-        Ball.render()
-    pygame.display.update()
-
-while gameRunning:
-    main_loop()
-    #print("ball:  ", ball.x, ball.y, "table_1:  ", table_1.x, table_1.y, "table_2:  ", table_2.x, table_2.y)
-
-pygame.quit()
-
-"""
