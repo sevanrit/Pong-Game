@@ -8,12 +8,12 @@ env = Env()
 res = env.reset()
 env.step(0)
 
-steps = 10 * 10**3
-model = PPO2(MlpPolicy, env, verbose=0) #verbose = 1 отображает на экран
-model.learn(total_timesteps=steps)
-model.save("models\\ppo2_1")
+steps = 10 * 10**4
+#model = PPO2(MlpPolicy, env, verbose=0) #verbose = 1 отображает на экран
+#model.learn(total_timesteps=steps)
+#model.save("models\\ppo_test")
 
-#model = PPO2.load("models\\PPO_001")
+model = PPO2.load("models\\ppo")
 obs = env.reset()
 
 while True:

@@ -8,8 +8,8 @@ class Env(gym.Env):
         pygame.init()
         self.clock = pygame.time.Clock()
         self.action_space = gym.spaces.Discrete(3)
-        self.observation_space = gym.spaces.Box(np.array((20, 0, 0, 0, -6, -3), dtype=np.float32), #Ракетки Мяч Скорость по X, Скорость по Y
-                                                np.array((760, 500, 600, 600, 6, 3), dtype=np.float32)#Ракетки Мяч Скорость по X, Скорость по Y
+        self.observation_space = gym.spaces.Box(np.array((0, 0, 0, 0, 0, 0), dtype=np.float32), #Ракетки Мяч Скорость по X, Скорость по Y
+                                                np.array((1, 1, 1, 1, 1, 1), dtype=np.float32)#Ракетки Мяч Скорость по X, Скорость по Y
                                                 )
 
         self.plat_1 = Plat(pygame.image.load(os.path.join('Sprites\\table.png')).convert_alpha(), 760, mainscript.start_pos, 20, 100, mainscript.points_1, mainscript.table_speed)
@@ -17,13 +17,19 @@ class Env(gym.Env):
         self.ball = Ball(pygame.image.load(os.path.join('Sprites\\ball.png')).convert_alpha(), 400, 300, 16, 16, mainscript.vectorX, mainscript.vectorY, mainscript.ball_speed, self.plat_1, self.plat_2, False, False)
         self.ai = AI(self.ball)
 
+    def norm(self, array):
+        min_arr = np.array((0, 0, 0, 0, -6, -3), dtype=np.float32)
+        max_arr = np.array((500, 500, 800, 600, 6, 3), dtype=np.float32)
+
+        return (array - min_arr) / (max_arr - min_arr)
+
     def step(self, action):
-        reward_move = 0
-        reward_pass = 0
-        reward_rebound = 20
-        reward_op_rebound = -1
-        reward_loss = -5
-        reward_win = 1000
+        reward_move = 0 #За движение
+        reward_pass = 0 #За ничего не деланье
+        reward_rebound = 20 #За отбитие мяча
+        reward_op_rebound = -1 #За отбитие мяча противником
+        reward_loss = -5 #За пропуск
+        reward_win = 1000 #За пропуск мяча соперником
         reward = 0
 
         #       Ball        #
@@ -74,9 +80,9 @@ class Env(gym.Env):
             self.ball.away("left")
             reward = reward_win
 
-        self.last_observation = np.array(
-            [self.plat_1.x, self.plat_1.y, self.plat_2.x, self.plat_2.y, self.ball.x, self.ball.y],
-            dtype=float)
+        self.last_observation = self.norm(np.array(
+            [self.plat_1.y, self.plat_2.y, self.ball.x, self.ball.y, self.ball.vectorX * mainscript.ball_speed, self.ball.vectorY * mainscript.ball_speed],
+            dtype=np.float32))
 
         done = False
         info = {}
@@ -85,9 +91,9 @@ class Env(gym.Env):
 
     def reset(self):
         self.ball.reset()
-        res = np.array([self.plat_1.y, self.plat_2.y, self.ball.x, self.ball.y,
+        res = self.norm(np.array([self.plat_1.y, self.plat_2.y, self.ball.x, self.ball.y,
                         self.ball.vectorX * mainscript.ball_speed,
-                        self.ball.vectorY * mainscript.ball_speed], dtype=float) #Ракетка 1 Y Ракетка 2 Y
+                        self.ball.vectorY * mainscript.ball_speed], dtype=np.float32)) #Ракетка 1 Y Ракетка 2 Y
         self.last_observation = res
 
         return self.last_observation
@@ -95,9 +101,4 @@ class Env(gym.Env):
     def render(self, mode='human'):
         self.ball.render()
 
-    def norm(self, array):
-        pass
-
-    def unnorm(self, array):
-        pass
 
