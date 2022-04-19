@@ -13,7 +13,7 @@ steps = 10 * 10**4
 #model.learn(total_timesteps=steps)
 #model.save("models\\ppo_test")
 
-model = PPO2.load("models\\speed_20_10\\model_003\\rl_model_1500000_steps")
+model = PPO2.load("models\\speed_20_10\\model_002\\rl_model_1500000_steps")
 obs = env.reset()
 
 while True:
