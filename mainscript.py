@@ -9,27 +9,28 @@ pygame.font.init()
 disp_width = 800
 disp_height = 600
 display = pygame.display.set_mode((disp_width, disp_height))
-myfont = pygame.font.SysFont('Comic Sans MS', 30)
-FPS = 60
+myfont = pygame.font.SysFont('Arial', 30)
+myfont_small = pygame.font.SysFont('Arial', 20)
+FPS = 80
 clock = pygame.time.Clock()
 bg = pygame.image.load(os.path.join('Sprites\\bg.png')).convert_alpha()
 vectorY = 0
 vectorX = 1
-ball_speed = 6
+ball_speed = 10 #6
 ball_plus = 0.2
 points_1 = 0
 points_2 = 0
-table_speed = 3
+table_speed = 5 #3
 start_pos = 240
 y_cof = 1.0 # Угол отскока
 r = 1
 
 render = True
 gameRunning = True
-GameLvl = 1
+GameLvl = 2
 
 class Plat:
-    def __init__(self, img, x, y, size_x, size_y, points, speed):
+    def __init__(self, img, x, y, size_x, size_y, points, speed, reb_counter, max_reb):
         self.img = img
         self.x = x
         self.y = y
@@ -37,6 +38,8 @@ class Plat:
         self.size_y = size_y
         self.points = points
         self.speed = speed
+        self.reb_counter = reb_counter
+        self.max_reb = max_reb
 
     def move_up(self):
         if (self.y ) >= 0:
@@ -60,7 +63,7 @@ class Ball:
         self.table_2 = table_2
         self.IsAway = IsAway
         self.Wait = Wait
-
+        self.max_speed = 0
 
     def correction_speed(vector_x, vector_y):
         if vector_y > 1:
@@ -109,6 +112,7 @@ class Ball:
             self.vectorX = -1
             self.table_2.points += 1
         self.y = 300
+        if self.speed > self.max_speed: self.max_speed = self.speed
         self.speed = ball_speed
         self.vectorY = 0
         self.table_1.y = start_pos
@@ -131,6 +135,10 @@ class Ball:
         display.blit(self.table_2.img, (self.table_2.x, self.table_2.y))
         display.blit(self.img, (self.x, self.y))
         display.blit(myfont.render(str(self.table_1.points), False, (255, 255, 255)), (360, 10))
+        display.blit(myfont_small.render("rebounds:  "+ str(self.table_1.reb_counter), False, (255, 0, 0)), (560, 5))
+        display.blit(myfont_small.render("max:  " + str(self.table_1.max_reb), False, (255, 0, 0)), (700, 5))
+        display.blit(myfont_small.render("speed:  " + str(round(self.speed, 2)), False, (255, 0, 0)), (560, 25))
+        display.blit(myfont_small.render("max:  " + str(round(self.max_speed, 2)), False, (255, 0, 0)), (700, 25))
         display.blit(myfont.render(str(self.table_2.points), False, (255, 255, 255)), (440, 10))
         pygame.display.update()
     
@@ -196,9 +204,14 @@ class AI:
         AI.trend(character)
 
         #Deffence
-        if plat.y + plat.size_y/2 + randint(-50, 50) >= self.correct: plat.move_up()
-        elif plat.y + plat.size_y/2 + randint(-50, 50)< self.correct:  plat.move_down()
+        s = randint(-70, 70)
+        if plat.y + plat.size_y/2 + s >= self.correct:
+            plat.move_up()
+        elif plat.y + plat.size_y/2 + s < self.correct:
+            plat.move_down()
 
-    def low_ai_main(self, plat):
-        if plat.y + plat.size_y/2 >= self.ball.y: plat.move_up()
-        elif plat.y + plat.size_y/2 < self.ball.y:  plat.move_down()
+    def low_ai_main(self, plat, character):
+        k = randint(-40, 40)
+        #k = 0
+        if plat.y + plat.size_y/2 + k >= self.ball.y: plat.move_up()
+        elif plat.y + plat.size_y/2 + k < self.ball.y:  plat.move_down()
